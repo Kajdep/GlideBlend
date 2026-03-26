@@ -264,11 +264,12 @@ export default function App() {
       {/* itch.io Game Embed */}
       <div className="fixed top-4 left-4 z-50">
         <iframe
-          frameBorder="0"
           src="https://itch.io/embed/4418323"
           width="208"
           height="167"
           title="GlideBlend on itch.io"
+          loading="lazy"
+          style={{ border: 0 }}
         >
           <a href="https://kajdep.itch.io/glideblend">GlideBlend by kajdep</a>
         </iframe>
