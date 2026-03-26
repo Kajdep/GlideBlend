@@ -23,6 +23,30 @@ It was built for merging AI-generated videos (e.g., multiple Sora or Veo 2 clips
 
 ---
 
+## Demo
+
+<div align="center">
+  <img src="public/ai-video-merging-process-infographic.jpg" alt="GlideBlend – AI Video Merging Process" width="720" />
+</div>
+
+### Embed
+
+You can embed GlideBlend in your own site using an iframe:
+
+```html
+<iframe
+  src="https://example.com/glideblend"
+  width="1024"
+  height="768"
+  style="border: none; border-radius: 12px;"
+  title="GlideBlend – Seamless AI Video Merging"
+></iframe>
+```
+
+> **Tip:** Replace `https://example.com/glideblend` with the URL of your deployed GlideBlend instance. The hosting server must send `Cross-Origin-Opener-Policy: same-origin` and `Cross-Origin-Embedder-Policy: require-corp` headers for FFmpeg.wasm to work inside the iframe.
+
+---
+
 ## Features
 
 - 🎬 **Seamless merging** — finds the best matching frame between two clips using 64-bit dHash + Hamming distance
