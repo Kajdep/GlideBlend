@@ -8,3 +8,5 @@ coverage/
 public/ffmpeg/
 .env*
 !.env.example
+.playwright-cli/
+output/
