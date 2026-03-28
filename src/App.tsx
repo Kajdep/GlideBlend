@@ -6,13 +6,13 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { fetchFile, toBlobURL } from '@ffmpeg/util';
-import { 
-  Upload, 
-  Video, 
-  Scissors, 
-  CheckCircle2, 
-  Loader2, 
-  Download, 
+import {
+  Upload,
+  Video,
+  Scissors,
+  CheckCircle2,
+  Loader2,
+  Download,
   AlertCircle,
   Play,
   Pause,
@@ -20,14 +20,14 @@ import {
   ArrowRightLeft,
   ArrowUpToLine,
   BookOpen,
-  Github
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { calculateDHash, hammingDistance, formatTimestamp } from './lib/video-utils';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import HowTo from './HowTo';
-import { GITHUB_URL } from './lib/constants';
+import { WEBSITE_URL } from './lib/constants';
+import { getDesktopAppInfo, saveBlobWithDesktop, type DesktopAppInfo } from './lib/desktop';
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -46,6 +46,7 @@ interface FrameHash {
 
 export default function App() {
   const [page, setPage] = useState<'home' | 'howto'>('home');
+  const [appInfo, setAppInfo] = useState<DesktopAppInfo | null>(null);
   const [video1, setVideo1] = useState<VideoFile | null>(null);
   const [video2, setVideo2] = useState<VideoFile | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -60,6 +61,11 @@ export default function App() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
+    getDesktopAppInfo()
+      .then(setAppInfo)
+      .catch(() => {
+        setAppInfo(null);
+      });
     loadFFmpeg();
   }, []);
 
@@ -69,7 +75,8 @@ export default function App() {
         console.warn('The page is not cross-origin isolated. FFmpeg.wasm might run with degraded performance or encounter issues.');
       }
 
-      const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm';
+      const getAssetUrl = (fileName: string) =>
+        new URL(`/ffmpeg/${fileName}`, window.location.origin).toString();
       const ffmpeg = new FFmpeg();
       ffmpeg.on('log', ({ message }) => {
         console.log('[FFmpeg Log]:', message);
@@ -80,8 +87,8 @@ export default function App() {
       
       console.log('Loading FFmpeg core...');
       await ffmpeg.load({
-        coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
-        wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
+        coreURL: await toBlobURL(getAssetUrl('ffmpeg-core.js'), 'text/javascript'),
+        wasmURL: await toBlobURL(getAssetUrl('ffmpeg-core.wasm'), 'application/wasm'),
       });
       console.log('FFmpeg core loaded successfully');
       ffmpegRef.current = ffmpeg;
@@ -162,6 +169,32 @@ export default function App() {
   };
 
   const [matchInfo, setMatchInfo] = useState<{ t1: number, t2: number, distance: number } | null>(null);
+
+  const handleDownload = async () => {
+    if (!mergedVideoUrl) return;
+
+    if (appInfo?.isDesktop) {
+      try {
+        const response = await fetch(mergedVideoUrl);
+        const blob = await response.blob();
+        const saveResult = await saveBlobWithDesktop(blob, 'glideblend.mp4');
+
+        if (!saveResult?.canceled && saveResult?.filePath) {
+          setStatus(`Saved to ${saveResult.filePath}`);
+        }
+      } catch (err) {
+        console.error('Failed to save merged video:', err);
+        setError('Failed to save the merged video to disk.');
+      }
+
+      return;
+    }
+
+    const link = document.createElement('a');
+    link.href = mergedVideoUrl;
+    link.download = 'glideblend.mp4';
+    link.click();
+  };
 
   const mergeVideos = async () => {
     if (!video1 || !video2 || !ffmpegRef.current) return;
@@ -261,42 +294,26 @@ export default function App() {
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-900/10 blur-[120px] rounded-full" />
       </div>
 
-      {/* itch.io Game Embed */}
-      <div className="fixed top-4 left-4 z-50">
-        <iframe
-          frameborder="0"
-          src="https://itch.io/embed/4418323?linkback=true&amp;border_width=0&amp;dark=true"
-          width="208"
-          height="165"
-          title="GlideBlend on itch.io"
-          loading="lazy"
-          style={{ border: 0 }}
-        >
-          <a href="https://kajdep.itch.io/glideblend">GlideBlend by kajdep</a>
-        </iframe>
-      </div>
-
-      {/* GitHub Link */}
-      <a
-        href={GITHUB_URL}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="fixed top-4 right-4 z-50 p-2 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition-colors text-white/40 hover:text-white/70"
-        title="View on GitHub"
-      >
-        <Github className="w-5 h-5" />
-      </a>
 
       <main className="relative z-10 max-w-5xl mx-auto px-6 py-12">
         {/* Header */}
         <header className="mb-16 text-center">
+          <motion.img
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            src="/glideblend-mark.svg"
+            alt="GlideBlend brand mark"
+            className="w-16 h-16 mx-auto mb-6"
+          />
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-6"
           >
             <RefreshCw className="w-3 h-3 text-orange-500" />
-            <span className="text-[10px] uppercase tracking-widest font-medium text-white/60">AI Video Utility</span>
+            <span className="text-[10px] uppercase tracking-widest font-medium text-white/60">
+              {appInfo?.isDesktop ? 'Desktop AI Video Utility' : 'AI Video Utility'}
+            </span>
           </motion.div>
           <motion.h1 
             initial={{ opacity: 0, y: 20 }}
@@ -492,14 +509,13 @@ export default function App() {
                       Use as Clip 2
                     </button>
                   </div>
-                  <a 
-                    href={mergedVideoUrl} 
-                    download="glideblend.mp4"
+                  <button
+                    onClick={handleDownload}
                     className="flex items-center gap-2 px-6 py-3 rounded-full bg-orange-500 text-black hover:bg-orange-400 transition-colors text-sm font-bold"
                   >
                     <Download className="w-4 h-4" />
-                    Download
-                  </a>
+                    {appInfo?.isDesktop ? 'Save MP4' : 'Download'}
+                  </button>
                 </div>
               </div>
               <div className="aspect-video rounded-3xl bg-white/5 border border-white/10 overflow-hidden shadow-2xl shadow-orange-500/5">
@@ -536,7 +552,17 @@ export default function App() {
             <span className="text-xs font-medium text-white/60">2.0s Search</span>
           </div>
         </div>
+        <a
+          href={WEBSITE_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-medium uppercase tracking-[0.2em] text-white/45 transition-colors hover:border-orange-500/40 hover:text-white"
+        >
+          glideblend.com
+        </a>
       </footer>
     </div>
   );
 }
+
+

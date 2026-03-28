@@ -4,9 +4,9 @@
  */
 
 import React from 'react';
-import { ArrowLeft, BookOpen, Github, Image } from 'lucide-react';
+import { ArrowLeft, BookOpen, Image } from 'lucide-react';
 import { motion } from 'motion/react';
-import { GITHUB_URL } from './lib/constants';
+import { WEBSITE_URL } from './lib/constants';
 
 interface HowToProps {
   onBack: () => void;
@@ -21,16 +21,6 @@ export default function HowTo({ onBack }: HowToProps) {
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-900/10 blur-[120px] rounded-full" />
       </div>
 
-      {/* GitHub Link */}
-      <a
-        href={GITHUB_URL}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="fixed top-4 right-4 z-50 p-2 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition-colors text-white/40 hover:text-white/70"
-        title="View on GitHub"
-      >
-        <Github className="w-5 h-5" />
-      </a>
 
       <main className="relative z-10 max-w-5xl mx-auto px-6 py-12">
         {/* Back Button */}
@@ -46,6 +36,13 @@ export default function HowTo({ onBack }: HowToProps) {
 
         {/* Header */}
         <header className="mb-14 text-center">
+          <motion.img
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            src="/glideblend-mark.svg"
+            alt="GlideBlend brand mark"
+            className="mx-auto mb-6 h-14 w-14"
+          />
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -136,7 +133,16 @@ export default function HowTo({ onBack }: HowToProps) {
             <span className="text-xs font-medium text-white/60">2.0s Search</span>
           </div>
         </div>
+        <a
+          href={WEBSITE_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-medium uppercase tracking-[0.2em] text-white/45 transition-colors hover:border-orange-500/40 hover:text-white"
+        >
+          glideblend.com
+        </a>
       </footer>
     </div>
   );
 }
+

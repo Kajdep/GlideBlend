@@ -2,7 +2,7 @@
 
 <h1>GlideBlend</h1>
 
-<p><strong>Join AI-generated video clips with pixel-perfect transitions — entirely in the browser.</strong></p>
+<p><strong>Join AI-generated video clips with pixel-perfect transitions and ship the tool as a sellable Windows desktop app.</strong></p>
 
 &nbsp;
 <img src="https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white" alt="React 19" />
@@ -17,33 +17,9 @@
 
 ## Overview
 
-GlideBlend is a browser-based video merging tool that intelligently stitches two video clips together at their most visually similar frames. Instead of a hard cut at an arbitrary timestamp, it uses **perceptual hashing (dHash)** to scan the transition zone of each clip, finds the pair of frames with the lowest Hamming distance, and uses **FFmpeg.wasm** to trim and concatenate the clips entirely client-side — no server upload required.
+GlideBlend is a video merging tool that intelligently stitches two video clips together at their most visually similar frames. Instead of a hard cut at an arbitrary timestamp, it uses **perceptual hashing (dHash)** to scan the transition zone of each clip, finds the pair of frames with the lowest Hamming distance, and uses **FFmpeg.wasm** to trim and concatenate the clips entirely client-side — no server upload required.
 
-It was built for merging AI-generated videos (e.g., multiple Sora or Veo 2 clips) into one seamless sequence, but works with any video content.
-
----
-
-## Demo
-
-<div align="center">
-  <img src="public/ai-video-merging-process-infographic.jpg" alt="GlideBlend – AI Video Merging Process" width="720" />
-</div>
-
-### Embed
-
-You can embed GlideBlend in your own site using an iframe:
-
-```html
-<iframe
-  src="https://example.com/glideblend"
-  width="1024"
-  height="768"
-  style="border: none; border-radius: 12px;"
-  title="GlideBlend – Seamless AI Video Merging"
-></iframe>
-```
-
-> **Tip:** Replace `https://example.com/glideblend` with the URL of your deployed GlideBlend instance. The hosting server must send `Cross-Origin-Opener-Policy: same-origin` and `Cross-Origin-Embedder-Policy: require-corp` headers for FFmpeg.wasm to work inside the iframe.
+It was built for merging AI-generated videos (e.g., multiple Sora or Veo 2 clips) into one seamless sequence, but works with any video content. The repository now includes a Windows desktop packaging flow so you can distribute it on itch.io as a downloadable app instead of depending on browser hosting constraints.
 
 ---
 
@@ -55,6 +31,7 @@ You can embed GlideBlend in your own site using an iframe:
 - 🔀 **Swap clips** — quickly swap the order of the two input clips
 - 📊 **Real-time progress** — live progress bar and status messages during processing
 - 💾 **Download as MP4** — one-click download of the merged video
+- 🖥️ **Desktop-ready** — Electron wrapper with native save flow and bundled FFmpeg core assets
 - 🌑 **Dark UI** — polished dark-mode interface with animated transitions
 
 ---
@@ -78,6 +55,7 @@ You can embed GlideBlend in your own site using an iframe:
 | Video processing | [FFmpeg.wasm 0.12](https://ffmpegwasm.netlify.app) |
 | Animations | [Motion/React 12](https://motion.dev) |
 | Icons | [Lucide React](https://lucide.dev) |
+| Desktop packaging | [Electron](https://www.electronjs.org) + [electron-builder](https://www.electron.build) |
 | Dev server | [Express 4](https://expressjs.com) (with COOP/COEP headers for `SharedArrayBuffer`) |
 
 ---
@@ -98,7 +76,7 @@ cd GlideBlend
 # 2. Install dependencies
 npm install
 
-# 3. Start the development server
+# 3. Start the web development server
 npm run dev
 ```
 
@@ -106,15 +84,34 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 > **Note:** The app requires cross-origin isolation (`COOP`/`COEP` headers) for FFmpeg.wasm to use `SharedArrayBuffer`. The included Express dev server sets these headers automatically.
 
+### Desktop Development
+
+```bash
+npm run electron:dev
+```
+
+This launches the Express dev server and opens the Electron shell against it.
+
+### Windows Release Build
+
+```bash
+npm run dist:win
+```
+
+Build artifacts are written to `release/`. The portable `.exe` is the simplest upload target for itch.io.
+
 ### Available Scripts
 
 | Command | Description |
 |---|---|
 | `npm run dev` | Start the Express + Vite development server |
-| `npm run build` | Build the app for production (`dist/`) |
+| `npm run electron:dev` | Start the web dev server and launch the Electron desktop shell |
+| `npm run build` | Build the renderer for production (`dist/`) |
+| `npm run pack` | Build an unpacked Electron app directory |
+| `npm run dist:win` | Build Windows portable + installer artifacts into `release/` |
 | `npm run preview` | Preview the production build |
 | `npm run lint` | Type-check with TypeScript |
-| `npm run clean` | Remove the `dist/` directory |
+| `npm run clean` | Remove generated build output and bundled FFmpeg assets |
 
 ---
 
@@ -129,15 +126,39 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 
+## itch.io Release Notes
+
+GlideBlend should be distributed on itch.io as a **downloadable Windows app**, not as an HTML upload:
+
+- FFmpeg.wasm depends on cross-origin isolation headers (`COOP`/`COEP`)
+- itch.io web hosting does not reliably let you control those headers
+- the Electron build bundles the FFmpeg runtime locally and avoids CDN/runtime hosting issues
+
+Recommended release flow:
+
+1. Run `npm run dist:win`
+2. Upload the portable `.exe` or installer from `release/`
+3. Mark the project as a downloadable Windows app on itch.io
+
+---
+
 ## Project Structure
 
 ```
 GlideBlend/
+├── electron/
+│   ├── main.cjs             # Electron main process
+│   ├── packaged-server.cjs # Local production server with COOP/COEP headers
+│   └── preload.cjs         # Safe IPC bridge for renderer-native features
+├── scripts/
+│   ├── electron-dev.cjs    # Starts Electron against the local dev server
+│   └── prepare-ffmpeg.cjs  # Bundles FFmpeg core assets into public/ffmpeg
 ├── src/
 │   ├── App.tsx           # Main React component (UI + merge logic)
 │   ├── main.tsx          # React entry point
 │   ├── index.css         # Global styles (Tailwind)
 │   └── lib/
+│       ├── desktop.ts      # Desktop bridge helpers
 │       └── video-utils.ts  # dHash, Hamming distance, timestamp formatting
 ├── server.ts             # Express dev server (COOP/COEP headers + Vite middleware)
 ├── index.html            # HTML entry point

@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>GlideBlend itch cover</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #08090c;
+        --bg-soft: #10131a;
+        --line: rgba(255,255,255,0.08);
+        --text: #f4f7fb;
+        --muted: rgba(244,247,251,0.72);
+        --orange: #f97316;
+        --cyan: #64e7ff;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        width: 630px;
+        height: 500px;
+        font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+        background:
+          radial-gradient(circle at 20% 18%, rgba(100,231,255,0.16), transparent 34%),
+          radial-gradient(circle at 88% 82%, rgba(249,115,22,0.18), transparent 32%),
+          linear-gradient(160deg, #0b0d11 0%, #09090b 100%);
+        color: var(--text);
+        overflow: hidden;
+      }
+      .frame {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        padding: 44px;
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 16px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: rgba(255,255,255,0.04);
+        font-size: 14px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+      .badge::before {
+        content: '';
+        width: 9px;
+        height: 9px;
+        border-radius: 999px;
+        background: linear-gradient(135deg, var(--cyan), var(--orange));
+      }
+      .content {
+        display: grid;
+        grid-template-columns: 1.2fr 0.8fr;
+        gap: 24px;
+        align-items: center;
+        height: calc(100% - 54px);
+      }
+      h1 {
+        margin: 18px 0 14px;
+        font-size: 72px;
+        line-height: 0.92;
+        letter-spacing: -0.06em;
+      }
+      p {
+        margin: 0;
+        max-width: 360px;
+        font-size: 24px;
+        line-height: 1.24;
+        color: var(--muted);
+      }
+      .chips {
+        display: flex;
+        gap: 12px;
+        margin-top: 28px;
+      }
+      .chip {
+        padding: 11px 15px;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        background: rgba(255,255,255,0.04);
+        font-size: 14px;
+        color: var(--text);
+      }
+      .panel {
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 280px;
+        border: 1px solid var(--line);
+        border-radius: 32px;
+        background:
+          linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02)),
+          rgba(10,11,16,0.96);
+        box-shadow: 0 32px 80px rgba(0,0,0,0.34);
+      }
+      .panel::after {
+        content: 'Perceptual frame matching';
+        position: absolute;
+        left: 24px;
+        right: 24px;
+        bottom: 20px;
+        font-size: 14px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: rgba(244,247,251,0.48);
+      }
+      .mark {
+        width: 180px;
+        height: 180px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="frame">
+      <div class="badge">Desktop Release</div>
+      <div class="content">
+        <div>
+          <h1>GlideBlend</h1>
+          <p>Stitch AI-generated clips at the closest visual match and export a cleaner handoff.</p>
+          <div class="chips">
+            <div class="chip">Local FFmpeg</div>
+            <div class="chip">Windows App</div>
+          </div>
+        </div>
+        <div class="panel">
+          <img class="mark" src="../public/glideblend-mark.svg" alt="GlideBlend mark" />
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

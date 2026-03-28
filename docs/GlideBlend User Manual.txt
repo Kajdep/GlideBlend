@@ -1,0 +1,31 @@
+GlideBlend User Manual
+=====================
+
+Purpose
+-------
+GlideBlend merges two clips at the most visually similar frames so the handoff feels cleaner than a hard cut.
+
+Quick Start
+-----------
+1. Launch GlideBlend.
+2. Load Clip 1 and Clip 2.
+3. Click GlideBlend.
+4. Review the merged preview.
+5. Click Save MP4 and choose an output location.
+
+Best Results
+------------
+- Use clips with the same resolution, frame rate, and codec when possible.
+- Keep similar lighting and composition across the transition.
+- For AI video workflows, stitch short generated shots in sequence rather than trying to blend unrelated scenes.
+
+Notes
+-----
+- All processing happens locally on your machine.
+- No footage is uploaded by the app.
+- Large source files may take longer to analyze and save.
+
+Support
+-------
+Official site: https://glideblend.com
+

@@ -1,0 +1,9 @@
+[[actions]]
+name = "play"
+path = "GlideBlend.exe"
+platform = "windows"
+
+[[actions]]
+name = "manual"
+path = "GlideBlend User Manual.txt"
+platform = "windows"

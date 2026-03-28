@@ -1,14 +1,26 @@
 {
-  "name": "react-example",
+  "name": "glideblend",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "description": "Desktop AI video transition tool for stitching clips with perceptual frame matching.",
+  "author": "Kajdep",
   "type": "module",
+  "main": "electron/main.cjs",
   "scripts": {
     "dev": "tsx server.ts",
-    "build": "vite build",
+    "electron:dev": "node scripts/electron-dev.cjs",
+    "prepare:ffmpeg": "node scripts/prepare-ffmpeg.cjs",
+    "build": "npm run build:web",
+    "build:web": "npm run prepare:ffmpeg && vite build",
+    "pack": "npm run build:web && electron-builder --dir",
+    "dist:win": "npm run build:web && electron-builder --win portable nsis",
     "preview": "vite preview",
-    "clean": "rm -rf dist",
-    "lint": "tsc --noEmit"
+    "clean": "rimraf dist release public/ffmpeg",
+    "lint": "tsc --noEmit",
+    "stage:itch": "node scripts/stage-itch.cjs",
+    "dist:itch": "npm run pack && npm run stage:itch",
+    "dist:appx": "npm run build:web && npm run prepare:appx && electron-builder --win appx",
+    "prepare:appx": "python scripts/generate-appx-assets.py"
   },
   "dependencies": {
     "@ffmpeg/ffmpeg": "^0.12.15",
@@ -29,9 +41,74 @@
     "@types/express": "^4.17.21",
     "@types/node": "^22.14.0",
     "autoprefixer": "^10.4.21",
+    "@ffmpeg/core": "0.12.6",
+    "electron": "^37.2.1",
+    "electron-builder": "^26.0.12",
+    "rimraf": "^6.0.1",
     "tailwindcss": "^4.1.14",
     "tsx": "^4.21.0",
     "typescript": "~5.8.2",
     "vite": "^6.2.0"
-  }
+  },
+  "build": {
+    "appId": "com.kajdep.glideblend",
+    "productName": "GlideBlend",
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "public/favicon.ico",
+      "package.json"
+    ],
+    "asar": true,
+    "win": {
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "public/favicon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "perMachine": false
+    },
+    "portable": {
+      "artifactName": "GlideBlend-${version}-portable.${ext}"
+    },
+    "extraFiles": [
+      {
+        "to": ".itch.toml",
+        "from": ".itch.toml"
+      },
+      {
+        "to": "GlideBlend User Manual.txt",
+        "from": "docs/GlideBlend User Manual.txt"
+      },
+      {
+        "to": "LICENSE.txt",
+        "from": "LICENSE"
+      }
+    ],
+    "appx": {
+      "identityName": "NatflaLtd.GlideBlend",
+      "publisher": "CN=5A609937-1921-4929-89C2-766139363CA0",
+      "publisherDisplayName": "Natfla Ltd",
+      "applicationId": "GlideBlend"
+    }
+  },
+  "homepage": "https://glideblend.com"
 }
